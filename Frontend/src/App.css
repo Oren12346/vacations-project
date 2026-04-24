@@ -1,0 +1,112 @@
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+.Main {
+    width: 100%;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(180deg, #f4f9ff 0%, #ffffff 45%, #eef6ff 100%);
+}
+
+.main-header {
+    width: 100%;
+    margin: 0;
+    padding: 30px 20px 18px;
+    text-align: center;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+    transition: background 0.35s ease;
+}
+
+.mainHead {
+    margin: 0 0 18px;
+    font-size: 2.5rem;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    color: white;
+    text-transform: capitalize;
+    text-shadow:
+        0 2px 6px rgba(0, 0, 0, 0.25),
+        0 0 18px rgba(255, 255, 255, 0.2);
+}
+
+.vacations-header {
+    background: linear-gradient(135deg, #ffb347 0%, #ff7b54 45%, #a855f7 100%);
+}
+
+.reports-header {
+    background: linear-gradient(135deg, #0f766e 0%, #0ea5e9 50%, #22c55e 100%);
+}
+
+.ai-header {
+    background: linear-gradient(135deg, #7c3aed 0%, #a855f7 45%, #ec4899 100%);
+}
+
+.mcp-header {
+    background: linear-gradient(135deg, #0891b2 0%, #2563eb 55%, #4f46e5 100%);
+}
+
+.admin-header {
+    background: linear-gradient(135deg, #111827 0%, #1f2937 45%, #374151 100%);
+}
+
+.add-header {
+    background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
+}
+
+.edit-header {
+    background: linear-gradient(135deg, #ea580c 0%, #f97316 50%, #fb923c 100%);
+}
+
+.login-header {
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 55%, #38bdf8 100%);
+}
+
+.register-header {
+    background: linear-gradient(135deg, #4c1d95 0%, #7c3aed 55%, #60a5fa 100%);
+}
+
+.default-header {
+    background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 55%, #38bdf8 100%);
+}
+
+.Main > main {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    display: block;
+}

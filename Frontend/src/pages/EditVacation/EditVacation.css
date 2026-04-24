@@ -1,0 +1,155 @@
+.edit-vacation {
+    min-height: 100vh;
+    padding: 40px 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background:
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.18), transparent 24%),
+        radial-gradient(circle at top right, rgba(168, 85, 247, 0.18), transparent 22%),
+        linear-gradient(180deg, #0f172a 0%, #111827 45%, #1e293b 100%);
+}
+
+.edit-vacation h5 {
+    margin: 0 0 18px 0;
+    text-align: center;
+    font-size: 38px;
+    font-weight: 800;
+    color: #f8fafc;
+}
+
+.edit-vacation form {
+    width: 100%;
+    max-width: 700px;
+    padding: 30px;
+    border-radius: 26px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+    backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.edit-vacation > p {
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto 16px;
+    padding: 14px 16px;
+    border-radius: 16px;
+    background: rgba(239, 68, 68, 0.16);
+    border: 1px solid rgba(239, 68, 68, 0.28);
+    color: #fecaca;
+    font-weight: 600;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.edit-vacation input,
+.edit-vacation textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 16px;
+    border: 1px solid rgba(125, 211, 252, 0.24);
+    background: rgba(255, 255, 255, 0.10);
+    color: #f8fafc;
+    font-size: 15px;
+    outline: none;
+    box-sizing: border-box;
+    transition: 0.25s;
+    font-family: inherit;
+}
+
+.edit-vacation input::placeholder,
+.edit-vacation textarea::placeholder {
+    color: #cbd5e1;
+}
+
+.edit-vacation input:focus,
+.edit-vacation textarea:focus {
+    border-color: rgba(45, 212, 191, 0.8);
+    box-shadow: 0 0 0 4px rgba(45, 212, 191, 0.14);
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.edit-vacation textarea {
+    min-height: 140px;
+    resize: vertical;
+}
+
+.edit-vacation input[type="date"],
+.edit-vacation input[type="file"],
+.edit-vacation input[type="number"],
+.edit-vacation input[type="text"] {
+    color: #e2e8f0;
+}
+
+.edit-vacation input[type="file"] {
+    padding: 12px;
+    cursor: pointer;
+}
+
+.edit-vacation input[type="file"]::file-selector-button {
+    margin-right: 14px;
+    padding: 10px 14px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    background: linear-gradient(135deg, #06b6d4, #2563eb);
+    color: white;
+    font-weight: 700;
+    transition: 0.25s;
+}
+
+.edit-vacation input[type="file"]::file-selector-button:hover {
+    transform: translateY(-1px);
+}
+
+.edit-vacation img {
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto 14px;
+    display: block;
+    border-radius: 18px;
+    object-fit: cover;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.edit-vacation button {
+    padding: 14px 20px;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    background: linear-gradient(135deg, #06b6d4, #2563eb);
+    color: white;
+    font-size: 15px;
+    font-weight: 800;
+    box-shadow: 0 12px 26px rgba(37, 99, 235, 0.24);
+    transition: 0.25s;
+}
+
+.edit-vacation button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 32px rgba(37, 99, 235, 0.30);
+}
+
+@media (max-width: 768px) {
+    .edit-vacation {
+        padding: 24px 14px;
+    }
+
+    .edit-vacation h2,
+    .edit-vacation h3,
+    .edit-vacation h4 {
+        font-size: 30px;
+        margin-bottom: 14px;
+    }
+
+    .edit-vacation form {
+        padding: 22px;
+        border-radius: 22px;
+    }
+}

@@ -1,0 +1,140 @@
+.add-vacation {
+    min-height: 100vh;
+    padding: 40px 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background:
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.18), transparent 24%),
+        radial-gradient(circle at top right, rgba(168, 85, 247, 0.18), transparent 22%),
+        linear-gradient(180deg, #0f172a 0%, #111827 45%, #1e293b 100%);
+}
+
+.add-vacation h4 {
+    margin: 0 0 18px 0;
+    text-align: center;
+    font-size: 38px;
+    font-weight: 800;
+    color: #f8fafc;
+}
+
+.add-vacation form {
+    width: 100%;
+    max-width: 700px;
+    padding: 30px;
+    border-radius: 26px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+    backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.add-vacation > p {
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto 16px;
+    padding: 14px 16px;
+    border-radius: 16px;
+    background: rgba(239, 68, 68, 0.16);
+    border: 1px solid rgba(239, 68, 68, 0.28);
+    color: #fecaca;
+    font-weight: 600;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.add-vacation input,
+.add-vacation textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 16px;
+    border: 1px solid rgba(125, 211, 252, 0.24);
+    background: rgba(255, 255, 255, 0.10);
+    color: #f8fafc;
+    font-size: 15px;
+    outline: none;
+    box-sizing: border-box;
+    transition: 0.25s;
+    font-family: inherit;
+}
+
+.add-vacation input::placeholder,
+.add-vacation textarea::placeholder {
+    color: #cbd5e1;
+}
+
+.add-vacation input:focus,
+.add-vacation textarea:focus {
+    border-color: rgba(45, 212, 191, 0.8);
+    box-shadow: 0 0 0 4px rgba(45, 212, 191, 0.14);
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.add-vacation textarea {
+    min-height: 140px;
+    resize: vertical;
+}
+
+.add-vacation input[type="date"],
+.add-vacation input[type="file"] {
+    color: #e2e8f0;
+}
+
+.add-vacation input[type="file"] {
+    padding: 12px;
+    cursor: pointer;
+}
+
+.add-vacation input[type="file"]::file-selector-button {
+    margin-right: 14px;
+    padding: 10px 14px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    background: linear-gradient(135deg, #06b6d4, #2563eb);
+    color: white;
+    font-weight: 700;
+    transition: 0.25s;
+}
+
+.add-vacation input[type="file"]::file-selector-button:hover {
+    transform: translateY(-1px);
+}
+
+.add-vacation button {
+    padding: 14px 20px;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    background: linear-gradient(135deg, #f59e0b, #ea580c);
+    color: white;
+    font-size: 15px;
+    font-weight: 800;
+    box-shadow: 0 12px 26px rgba(234, 88, 12, 0.24);
+    transition: 0.25s;
+}
+
+.add-vacation button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 32px rgba(234, 88, 12, 0.30);
+}
+
+@media (max-width: 768px) {
+    .add-vacation {
+        padding: 24px 14px;
+    }
+
+    .add-vacation h4 {
+        font-size: 30px;
+        margin-bottom: 14px;
+    }
+
+    .add-vacation form {
+        padding: 22px;
+        border-radius: 22px;
+    }
+}

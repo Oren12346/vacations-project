@@ -1,0 +1,325 @@
+.VacationsList {
+    width: 100%;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background:
+        radial-gradient(circle at top left, rgba(255, 183, 77, 0.22), transparent 24%),
+        radial-gradient(circle at top right, rgba(186, 104, 200, 0.18), transparent 28%),
+        linear-gradient(180deg, #fff3e8 0%, #fff8f3 35%, #f7f0ff 100%);
+}
+
+.VacationsList .vacations-content {
+    width: 100%;
+    min-height: 100vh;
+    padding: 32px 28px 40px;
+    box-sizing: border-box;
+}
+
+.VacationsList h2 {
+    margin: 0 0 28px 0;
+    text-align: center;
+    font-size: 38px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    color: #6a1b9a;
+    text-shadow: 0 2px 8px rgba(255, 255, 255, 0.7);
+}
+
+.VacationsList .filters {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin: 0 0 34px 0;
+    padding: 18px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 10px 24px rgba(106, 27, 154, 0.08);
+    backdrop-filter: blur(8px);
+}
+
+.VacationsList .filters button,
+.VacationsList .pagination button,
+.VacationsList .like-button {
+    border: none;
+    cursor: pointer;
+    transition: 0.25s ease;
+    font-family: inherit;
+}
+
+.VacationsList .filters button {
+    padding: 11px 18px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #ff8a65, #f4511e);
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    box-shadow: 0 8px 18px rgba(244, 81, 30, 0.2);
+}
+
+.VacationsList .filters button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(244, 81, 30, 0.28);
+}
+
+.VacationsList .filters button.active-filter {
+    background: linear-gradient(135deg, #8e24aa, #5e35b1);
+    box-shadow: 0 10px 22px rgba(94, 53, 177, 0.28);
+    transform: scale(1.03);
+}
+
+.VacationsList .vacations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 28px;
+}
+
+.VacationsList .vacation-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 26px;
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(255, 204, 188, 0.7);
+    box-shadow:
+        0 14px 34px rgba(106, 27, 154, 0.1),
+        0 3px 10px rgba(244, 81, 30, 0.06);
+    backdrop-filter: blur(10px);
+    transition: transform 0.28s ease, box-shadow 0.28s ease;
+}
+
+.VacationsList .vacation-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, 0.08) 100%);
+    pointer-events: none;
+}
+
+.VacationsList .vacation-card:hover {
+    transform: translateY(-8px);
+    box-shadow:
+        0 22px 40px rgba(106, 27, 154, 0.14),
+        0 6px 14px rgba(244, 81, 30, 0.08);
+}
+
+.VacationsList .vacation-image {
+    width: 100%;
+    height: 230px;
+    object-fit: cover;
+    display: block;
+    border-bottom: 1px solid rgba(255, 204, 188, 0.45);
+}
+
+.VacationsList .vacation-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.VacationsList .vacation-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.VacationsList .destination {
+    margin: 0;
+    font-size: 25px;
+    font-weight: 800;
+    color: #6a1b9a;
+    line-height: 1.2;
+}
+
+.VacationsList .price {
+    flex-shrink: 0;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #ffe0b2, #ffcc80);
+    color: #bf360c;
+    font-size: 14px;
+    font-weight: 800;
+    box-shadow: inset 0 0 0 1px rgba(191, 54, 12, 0.08);
+}
+
+.VacationsList .dates {
+    width: fit-content;
+    padding: 9px 13px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #f3e5f5, #ede7f6);
+    color: #6a1b9a;
+    font-size: 13px;
+    font-weight: 800;
+    box-shadow: inset 0 0 0 1px rgba(106, 27, 154, 0.08);
+}
+
+.VacationsList .description {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.75;
+    color: #5d4037;
+}
+
+.VacationsList .vacation-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+}
+
+.VacationsList .likes-count {
+    padding: 9px 13px;
+    border-radius: 999px;
+    background: rgba(106, 27, 154, 0.08);
+    color: #6a1b9a;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.VacationsList .like-button {
+    padding: 11px 18px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #ab47bc, #8e24aa);
+    color: white;
+    font-size: 14px;
+    font-weight: 800;
+    box-shadow: 0 8px 18px rgba(142, 36, 170, 0.22);
+}
+
+.VacationsList .like-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(142, 36, 170, 0.28);
+}
+
+.VacationsList .like-button.liked {
+    background: linear-gradient(135deg, #ef5350, #d32f2f);
+    box-shadow: 0 8px 18px rgba(211, 47, 47, 0.22);
+}
+
+.VacationsList .like-button.liked:hover {
+    box-shadow: 0 12px 24px rgba(211, 47, 47, 0.3);
+}
+
+.VacationsList .empty-message {
+    margin: 10px auto 0;
+    max-width: 520px;
+    text-align: center;
+    padding: 40px 24px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.84);
+    border: 1px solid rgba(255, 204, 188, 0.6);
+    color: #6d4c41;
+    font-size: 18px;
+    font-weight: 600;
+    box-shadow: 0 14px 30px rgba(106, 27, 154, 0.08);
+    backdrop-filter: blur(8px);
+}
+
+.VacationsList .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 36px;
+    padding: 16px 20px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.62);
+    box-shadow: 0 10px 24px rgba(106, 27, 154, 0.08);
+    backdrop-filter: blur(8px);
+}
+
+.VacationsList .pagination button {
+    padding: 11px 18px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #ff8a65, #f4511e);
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    box-shadow: 0 8px 18px rgba(244, 81, 30, 0.2);
+}
+
+.VacationsList .pagination button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(244, 81, 30, 0.28);
+}
+
+.VacationsList .pagination span {
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: rgba(255, 248, 240, 0.95);
+    color: #6a1b9a;
+    font-size: 15px;
+    font-weight: 800;
+    box-shadow: inset 0 0 0 1px rgba(106, 27, 154, 0.07);
+}
+
+@media (max-width: 900px) {
+    .VacationsList .vacations-content {
+        padding: 24px 18px 32px;
+    }
+
+    .VacationsList h2 {
+        font-size: 32px;
+    }
+
+    .VacationsList .vacations-grid {
+        gap: 22px;
+    }
+}
+
+@media (max-width: 768px) {
+    .VacationsList h2 {
+        font-size: 28px;
+    }
+
+    .VacationsList .filters {
+        padding: 14px;
+    }
+
+    .VacationsList .vacation-image {
+        height: 210px;
+    }
+
+    .VacationsList .vacation-top {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .VacationsList .price {
+        align-self: flex-start;
+    }
+}
+
+@media (max-width: 480px) {
+    .VacationsList .vacations-content {
+        padding: 18px 14px 26px;
+    }
+
+    .VacationsList .vacation-image {
+        height: 190px;
+    }
+
+    .VacationsList .vacation-body {
+        padding: 16px;
+    }
+
+    .VacationsList .destination {
+        font-size: 22px;
+    }
+
+    .VacationsList .filters button,
+    .VacationsList .pagination button,
+    .VacationsList .like-button {
+        width: 100%;
+    }
+
+    .VacationsList .pagination {
+        align-items: stretch;
+    }
+}

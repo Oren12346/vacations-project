@@ -1,0 +1,86 @@
+.Menu {
+    display: flex;
+    gap: 12px;
+    padding: 15px 20px;
+    align-items: center;
+    flex-wrap: wrap;
+    transition: 0.3s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    position: relative;
+    z-index: 1000;
+}
+
+.Menu a,
+.Menu button,
+.Menu .user-name {
+    padding: 8px 14px;
+    border-radius: 999px;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+.Menu a {
+    text-decoration: none;
+}
+
+.Menu button {
+    border: none;
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.18);
+}
+
+.Menu a:hover,
+.Menu button:hover {
+    background-color: rgba(255, 255, 255, 0.22);
+    transform: translateY(-1px);
+}
+
+.Menu .active {
+    background-color: rgba(255, 255, 255, 0.3);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+}
+
+/* Login */
+.Menu.login-theme {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+}
+
+/* Register */
+.Menu.register-theme {
+    background: linear-gradient(135deg,  #1e3c72, #2a5298);
+}
+
+/* AI Recommendation */
+.Menu.ai-theme {
+    background: linear-gradient(135deg, #00b4d8, #0077b6);
+}
+
+/* Vacations List */
+.Menu.vacations-theme {
+    background: linear-gradient(135deg, #f4511e, #6a1b9a);
+}
+
+/* MCP Question */
+.Menu.mcp-theme {
+    background: linear-gradient(135deg, #0f766e, #7c3aed);
+}
+
+/* Admin Vacations */
+.Menu.admin-theme {
+    background: linear-gradient(135deg, #0f172a, #334155);
+}
+
+/* Reports */
+.Menu.reports-theme {
+    background: linear-gradient(135deg, #1d4ed8, #0f766e);
+}
+
+.Menu.add-theme {
+    background: linear-gradient(135deg, #f59e0b, #ea580c);
+}
+
+.Menu.edit-theme {
+    background: linear-gradient(135deg, #06b6d4, #2563eb);
+}

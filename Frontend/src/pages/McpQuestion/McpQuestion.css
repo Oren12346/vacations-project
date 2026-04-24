@@ -1,0 +1,140 @@
+.McpQuestion {
+    min-height: 100vh;
+    padding: 40px 20px;
+    box-sizing: border-box;
+    background:
+        radial-gradient(circle at top left, rgba(34, 211, 238, 0.22), transparent 28%),
+        radial-gradient(circle at top right, rgba(168, 85, 247, 0.22), transparent 26%),
+        radial-gradient(circle at bottom center, rgba(45, 212, 191, 0.18), transparent 24%),
+        linear-gradient(180deg, #07121f 0%, #0b1f33 45%, #111827 100%);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.McpQuestion .mcp-card {
+    width: 100%;
+    max-width: 900px;
+    padding: 32px;
+    border-radius: 28px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+    backdrop-filter: blur(14px);
+}
+
+.McpQuestion h2 {
+    margin: 0;
+    text-align: center;
+    font-size: 38px;
+    color: #f8fafc;
+    letter-spacing: 0.5px;
+}
+
+.McpQuestion .mcp-subtitle {
+    margin: 14px 0 24px 0;
+    text-align: center;
+    color: #cbd5e1;
+    font-size: 16px;
+    line-height: 1.7;
+}
+
+.McpQuestion .error-message {
+    margin: 0 0 18px 0;
+    padding: 14px 16px;
+    border-radius: 16px;
+    background: rgba(239, 68, 68, 0.16);
+    border: 1px solid rgba(239, 68, 68, 0.28);
+    color: #fecaca;
+    font-weight: 600;
+    text-align: center;
+}
+
+.McpQuestion form {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.McpQuestion input {
+    flex: 1;
+    min-width: 260px;
+    padding: 15px 16px;
+    border-radius: 16px;
+    border: 1px solid rgba(125, 211, 252, 0.28);
+    background: rgba(255, 255, 255, 0.1);
+    color: #f8fafc;
+    font-size: 15px;
+    outline: none;
+    box-sizing: border-box;
+    transition: 0.25s;
+}
+
+.McpQuestion input::placeholder {
+    color: #cbd5e1;
+}
+
+.McpQuestion input:focus {
+    border-color: rgba(45, 212, 191, 0.8);
+    box-shadow: 0 0 0 4px rgba(45, 212, 191, 0.14);
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.McpQuestion button {
+    padding: 15px 22px;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    background: linear-gradient(135deg, #14b8a6, #7c3aed);
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    box-shadow: 0 10px 22px rgba(124, 58, 237, 0.24);
+    transition: 0.25s;
+}
+
+.McpQuestion button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 28px rgba(124, 58, 237, 0.32);
+}
+
+.McpQuestion .answer-box {
+    margin-top: 28px;
+    padding: 22px;
+    border-radius: 22px;
+    background:
+        linear-gradient(135deg, rgba(20, 184, 166, 0.14), rgba(124, 58, 237, 0.14)),
+        rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.McpQuestion .answer-box p {
+    margin: 0;
+    color: #f8fafc;
+    line-height: 1.8;
+    white-space: pre-line;
+}
+
+@media (max-width: 768px) {
+    .McpQuestion {
+        padding: 24px 14px;
+    }
+
+    .McpQuestion .mcp-card {
+        padding: 22px;
+        border-radius: 22px;
+    }
+
+    .McpQuestion h2 {
+        font-size: 30px;
+    }
+
+    .McpQuestion form {
+        flex-direction: column;
+    }
+
+    .McpQuestion button {
+        width: 100%;
+    }
+}
+
