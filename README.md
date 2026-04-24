@@ -1,5 +1,8 @@
 # Oren Meshulam - Project 3
 
+## GitHub Repository
+https://github.com/Oren12346/vacations-project
+
 # Vacations Project
 
 ## Description
