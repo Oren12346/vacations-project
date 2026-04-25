@@ -53,7 +53,7 @@ PORT=4000
 DB_HOST=database
 DB_PORT=3306
 DB_USER=root
-DB_PASSWORD=1234
+DB_PASSWORD=TempPass123!
 DB_NAME=vacations_db
 JWT_SECRET=your_secret
 OPENAI_API_KEY=your_key
@@ -66,7 +66,7 @@ Postman
 
 Postman collection is included in:
 
-Postman/Vacations_Project_Simple.postman_collection.json
+Vacation Project.postman_collection.json
 
 Use:
 
