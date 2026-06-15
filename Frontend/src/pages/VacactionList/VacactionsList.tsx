@@ -1,25 +1,28 @@
-// Page component responsible for the VacactionsList screen.
+// Page component responsible for the VacationsList screen.
 import { useEffect, useState } from "react";
 import "./VacationsList.css";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../store/store";
-import { VacationModel } from "../../1-models/vacation-model";
 import vacationsService from "../../3-services/vacations-service";
 import likesService from "../../3-services/likes-service";
 import appConfig from "../../2-utils/app-config";
+import { initVacations, likeVacation, unlikeVacation } from "../../store/vacationsSlice";
 
 // Render the vacations list for regular users.
 function VacationsList() {
     const navigate = useNavigate();
-    const user = useSelector((state: RootState) => state.user);
+    const dispatch = useDispatch();
 
-    const [vacations, setVacations] = useState<VacationModel[]>([]);
+    const user = useSelector((state: RootState) => state.user);
+    const vacations = useSelector((state: RootState) => state.vacations);
+
     const [filter, setFilter] = useState("all");
     const [currentPage, setCurrentPage] = useState(1);
+
     const vacationsPerPage = 9;
 
-    // Redirect unauthorized users and load vacations from the server.
+    // Redirect unauthorized users and load vacations into Redux.
     useEffect(() => {
         const token = localStorage.getItem("token");
 
@@ -33,54 +36,36 @@ function VacationsList() {
             return;
         }
 
-        vacationsService.getAllVacations()
-            .then((vacationsFromServer) => {
-                setVacations(vacationsFromServer);
-            })
-            .catch((error) => {
-                console.error(error);
-            });
-    }, [user, navigate]);
+        if (vacations.length === 0) {
+            vacationsService.getAllVacations()
+                .then((vacationsFromServer) => {
+                    dispatch(initVacations(vacationsFromServer));
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
+        }
+    }, [user, navigate, dispatch, vacations.length]);
 
-    // Run side effects such as redirects or initial data loading when the component mounts.
+    // Reset pagination when the selected filter changes.
     useEffect(() => {
         setCurrentPage(1);
     }, [filter]);
 
-    // Add a like for the selected vacation and update the local UI.
+    // Add a like for the selected vacation and update Redux.
     async function handleLike(vacationId: number): Promise<void> {
         if (!user) return;
 
         await likesService.addLike(vacationId);
-        setVacations(currentVacations =>
-            currentVacations.map(currentVacation =>
-                currentVacation.vacationId === vacationId
-                    ? {
-                        ...currentVacation,
-                        isLiked: true,
-                        likesCount: (currentVacation.likesCount ?? 0) + 1
-                    }
-                    : currentVacation
-            )
-        );
+        dispatch(likeVacation(vacationId));
     }
 
-    // Remove a like for the selected vacation and update the local UI.
+    // Remove a like for the selected vacation and update Redux.
     async function handleUnlike(vacationId: number): Promise<void> {
         if (!user) return;
 
         await likesService.removeLike(vacationId);
-        setVacations(currentVacations =>
-            currentVacations.map(currentVacation =>
-                currentVacation.vacationId === vacationId
-                    ? {
-                        ...currentVacation,
-                        isLiked: false,
-                        likesCount: Math.max((currentVacation.likesCount ?? 0) - 1, 0)
-                    }
-                    : currentVacation
-            )
-        );
+        dispatch(unlikeVacation(vacationId));
     }
 
     const today = new Date().toISOString().split("T")[0];
@@ -94,6 +79,7 @@ function VacationsList() {
 
         return true;
     });
+
     const filterButtons = [
         { value: "all", label: "All Vacations" },
         { value: "liked", label: "Liked Vacations" },
@@ -107,7 +93,6 @@ function VacationsList() {
 
     const totalPages = Math.ceil(filteredVacations.length / vacationsPerPage);
     const safeTotalPages = Math.max(totalPages, 1);
-
 
     return (
         <div className="VacationsList">
@@ -168,7 +153,7 @@ function VacationsList() {
                                                         : handleLike(vacation.vacationId!)
                                                 }
                                             >
-                                                {vacation.isLiked ? "Unlike" : "Like"}
+                                                {vacation.isLiked ? "♥ Liked" : "♡ Like"}
                                             </button>
                                         )}
                                     </div>

@@ -2,24 +2,27 @@
 import mysql from "mysql2/promise";
 import appConfig from "./app-config";
 
-// Create one shared MySQL connection pool for the whole backend.
-const pool = mysql.createPool({
-    host: appConfig.dbHost,
-    port: appConfig.dbPort,
-    user: appConfig.dbUser,
-    password: appConfig.dbPassword,
-    database: appConfig.dbName,
-    connectionLimit: 10
-});
-
 type QueryParams = Array<string | number | boolean | Date | null>;
 
-// Execute a SQL query with optional parameters and return the result.
-async function execute(sql: string, params: QueryParams = []): Promise<unknown> {
-    const [result] = await pool.execute(sql, params);
-    return result;
+class Dal {
+
+    // Create one shared MySQL connection pool for the whole backend.
+    private readonly pool = mysql.createPool({
+        host: appConfig.dbHost,
+        port: appConfig.dbPort,
+        user: appConfig.dbUser,
+        password: appConfig.dbPassword,
+        database: appConfig.dbName,
+        connectionLimit: 10
+    });
+
+    // Execute a SQL query with optional parameters and return the result.
+    public async execute(sql: string, params: QueryParams = []): Promise<unknown> {
+        const [result] = await this.pool.execute(sql, params);
+        return result;
+    }
 }
 
-export default {
-    execute
-};
+const dal = new Dal();
+
+export default dal;

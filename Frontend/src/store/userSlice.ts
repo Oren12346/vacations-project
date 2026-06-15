@@ -5,33 +5,24 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 
 type UserState = UserModel | null;
 
-const initialState: UserState = null as UserState;
+const initialState: UserState = null;
 
-// Store the logged-in user in Redux.
 const userSlice = createSlice({
-
     name: "user",
     initialState,
     reducers: {
 
-                // Save the current user in the Redux store.
+        // Save the current user in the Redux store.
         initUser: (_currentState, action: PayloadAction<UserModel>) => {
-
             return action.payload;
-
         },
-                // Clear the user from the Redux store on logout.
-        logoutUser: (_currentState) => {
 
+        // Clear the user from the Redux store on logout.
+        logoutUser: () => {
             return null;
-
         }
-
-    },
-
-
+    }
 });
-
 
 export const { initUser, logoutUser } = userSlice.actions;
 export default userSlice.reducer;

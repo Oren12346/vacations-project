@@ -2,8 +2,11 @@
 import { useEffect, useState, ChangeEvent, SyntheticEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import axios from "axios";
+import { useDispatch } from "react-redux";
 import { VacationModel } from "../../1-models/vacation-model";
 import vacationsService from "../../3-services/vacations-service";
+import { addVacation as addVacationToRedux } from "../../store/vacationsSlice";
 import "./AddVacation.css";
 
 type UserPayload = {
@@ -18,6 +21,8 @@ function AddVacation() {
     const [error, setError] = useState<string>("");
 
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+
     const today = new Date().toISOString().slice(0, 10);
 
     // Redirect unauthorized users when the page opens.
@@ -77,7 +82,7 @@ function AddVacation() {
         return "";
     }
 
-    // Validate the form, create FormData, and send it to the server.
+    // Validate the form, create FormData, send it to the server, and update Redux.
     async function Send(event: SyntheticEvent): Promise<void> {
         event.preventDefault();
         setError("");
@@ -89,24 +94,36 @@ function AddVacation() {
             return;
         }
 
+        const destination = vacation.destination!;
+        const description = vacation.description!;
+        const startDate = vacation.startDate!;
+        const endDate = vacation.endDate!;
         const price = vacation.price!;
         const image = imageFile!;
 
         try {
             const formData = new FormData();
 
-            formData.append("destination", vacation.destination);
-            formData.append("description", vacation.description);
-            formData.append("startDate", vacation.startDate);
-            formData.append("endDate", vacation.endDate);
+            formData.append("destination", destination);
+            formData.append("description", description);
+            formData.append("startDate", startDate);
+            formData.append("endDate", endDate);
             formData.append("price", price.toString());
             formData.append("image", image);
 
-            await vacationsService.addVacation(formData);
+            const addedVacation = await vacationsService.addVacation(formData);
+
+            dispatch(addVacationToRedux(addedVacation));
+
             navigate("/admin-vacations");
         }
-        catch (err: any) {
-            setError(err.response?.data || "Failed to add vacation.");
+        catch (err: unknown) {
+            if (axios.isAxiosError<string>(err)) {
+                setError(err.response?.data || "Failed to add vacation.");
+            }
+            else {
+                setError("Failed to add vacation.");
+            }
         }
     }
 
@@ -114,7 +131,7 @@ function AddVacation() {
         <div className="add-vacation">
             <h4>Add Vacation</h4>
 
-            {error && <p>{error}</p>}
+            {error && <p className="error-message">{error}</p>}
 
             <form onSubmit={Send} noValidate>
                 <input type="text" name="destination" placeholder="Destination" onChange={handleChange} />

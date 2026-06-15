@@ -1,85 +1,213 @@
-# Oren Meshulam - Project 3
+# Vacations Project - Oren Meshulam
 
-## GitHub Repository
-https://github.com/Oren12346/vacations-project
+Full Stack Vacations Management Project built with React, TypeScript, Node.js, Express, MySQL, Redux Toolkit, Docker, OpenAI API, and MCP.
 
-# Vacations Project
+## Main Features
 
-## Description
-A full-stack web application for managing and viewing vacations.
+### User
+- Register and log in with JWT authentication.
+- View all vacations.
+- Filter vacations by all, liked, active, and upcoming.
+- Like and unlike vacations.
+- Get an AI-based vacation recommendation.
+- Ask database questions through MCP tools.
 
-Users can:
-- View available vacations
-- Like / unlike vacations
-- Get AI-based recommendations
-- Ask questions about the database (MCP)
-
-Admin users can:
-- Add vacations
-- Edit vacations (including images)
-- Delete vacations
-- View reports
-
----
+### Admin
+- Add new vacations with image upload.
+- Edit existing vacations, including optional image replacement.
+- Delete vacations.
+- View vacation likes reports.
+- Export reports to CSV.
 
 ## Technologies
-- Frontend: React + TypeScript + Vite
-- Backend: Node.js + Express + TypeScript
-- Database: MySQL
-- State Management: Redux Toolkit
-- API Testing: Postman
-- Containerization: Docker
 
----
+### Frontend
+- React
+- TypeScript
+- Vite
+- React Router
+- Redux Toolkit
+- Axios
+- Recharts
 
-## Run the Project (Docker)
+### Backend
+- Node.js
+- Express
+- TypeScript
+- MySQL2
+- JWT
+- bcrypt
+- multer
+- OpenAI API
+- MCP SDK
+
+### Database / DevOps
+- MySQL
+- Docker
+- Docker Compose
+- Postman
+
+## Project Structure
+
+```text
+vacations-project-Oren-Meshulam/
+├── Backend/
+│   ├── src/
+│   │   ├── 1-models/
+│   │   ├── 2-utils/
+│   │   ├── 3-services/
+│   │   ├── 4-middleware/
+│   │   ├── 5-routes/
+│   │   ├── 7-mcp/
+│   │   ├── app.ts
+│   │   └── assets/images/
+│   └── package.json
+├── Frontend/
+│   ├── src/
+│   │   ├── 1-models/
+│   │   ├── 2-utils/
+│   │   ├── 3-services/
+│   │   ├── pages/
+│   │   └── store/
+│   └── package.json
+├── Database/
+│   └── vacations_db.sql
+├── compose.yaml
+├── .env.example
+└── Vacation Project.postman_collection.json
+```
+
+## Environment Variables
+
+The real `.env` file is intentionally not included in the project because it can contain private secrets such as `OPENAI_API_KEY` and `JWT_SECRET`.
+
+Use the provided example file:
 
 ```bash
-docker compose up -d --build
+cp .env.example .env
+```
 
+Then fill in your real values.
 
-Frontend:
-http://localhost:5173
+Example structure:
 
-Backend:
-http://localhost:4000
-
-
-Environment Variables
-
-Create .env inside Backend:
-
+```env
 PORT=4000
-DB_HOST=database
+DB_HOST=localhost
 DB_PORT=3306
 DB_USER=root
 DB_PASSWORD=TempPass123!
 DB_NAME=vacations_db
-JWT_SECRET=your_secret
-OPENAI_API_KEY=your_key
-Database
+JWT_SECRET=replace_with_your_secret
+OPENAI_API_KEY=replace_with_your_openai_api_key
+AI_MODEL=gpt-5.4
+FRONTEND_URL=http://localhost:5173
+```
 
-The database is automatically created using:
+For local backend development from inside the `Backend` folder, create a local `Backend/.env` file using `Backend/.env.example` as the template.
 
-Database/vacations_db.sql
-Postman
+Do not upload real `.env` files to GitHub.
 
-Postman collection is included in:
+## Run with Docker
 
-Vacation Project.postman_collection.json
+From the project root:
 
-Use:
+```bash
+docker compose up -d --build
+```
 
-Login request to get token
-Other requests use Authorization header
-Notes
+Frontend:
+
+```text
+http://localhost:5173
+```
+
+Backend:
+
+```text
+http://localhost:4000
+```
 
 Images are served from:
+
+```text
 http://localhost:4000/images/
+```
 
-The system is case-sensitive (Linux Docker environment)
+If the database schema changes and you need to recreate the database container:
 
-If updating the SQL file, run:
-
+```bash
 docker compose down -v
 docker compose up -d --build
+```
+
+## Run Locally Without Docker
+
+### Backend
+
+```bash
+cd Backend
+npm install
+cp .env.example .env
+npm start
+```
+
+### Frontend
+
+```bash
+cd Frontend
+npm install
+npm run dev
+```
+
+## Database
+
+The database initialization file is located at:
+
+```text
+Database/vacations_db.sql
+```
+
+When running with Docker, MySQL loads this file automatically through Docker Compose.
+
+## API / Postman
+
+A Postman collection is included:
+
+```text
+Vacation Project.postman_collection.json
+```
+
+Recommended flow:
+
+1. Register or log in.
+2. Copy the JWT token from the response.
+3. Use it in protected requests with the `Authorization` header:
+
+```text
+Bearer <token>
+```
+
+## Important Implementation Notes
+
+- Backend routes are separated by feature area.
+- Backend services and utilities are organized with classes.
+- Global error handling is handled by `catch-all` middleware.
+- Vacation images are uploaded using multer and saved with UUID filenames.
+- Uploaded images are stored under `Backend/src/assets/images`.
+- The frontend stores the authenticated user and vacations list in Redux.
+- Vacation like/unlike operations update Redux immediately after server success.
+- Admin add, edit, and delete operations update Redux after server success.
+- AI and MCP features require a valid OpenAI API key.
+
+## Security Notes
+
+- Real `.env` files are ignored and should never be committed.
+- `.env.example` is safe to commit because it contains placeholders only.
+- Passwords are hashed with bcrypt.
+- Protected routes require a valid JWT.
+- Admin routes require both login and admin role verification.
+
+## Author
+
+Oren Meshulam

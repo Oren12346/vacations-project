@@ -2,10 +2,14 @@
 import { useEffect, useState, ChangeEvent, SyntheticEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import type { RootState } from "../../store/store";
 import { VacationModel } from "../../1-models/vacation-model";
 import vacationsService from "../../3-services/vacations-service";
 import appConfig from "../../2-utils/app-config";
-import "./EditVacation.css"
+import { updateVacation as updateVacationInRedux } from "../../store/vacationsSlice";
+import "./EditVacation.css";
 
 type UserPayload = {
     role: string;
@@ -14,7 +18,10 @@ type UserPayload = {
 // Render the edit vacation page for admin users only.
 function EditVacation() {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+
     const { vacationId } = useParams();
+    const vacations = useSelector((state: RootState) => state.vacations);
 
     const [vacation, setVacation] = useState<VacationModel>(new VacationModel());
     const [imageFile, setImageFile] = useState<File | null>(null);
@@ -45,18 +52,26 @@ function EditVacation() {
 
         if (!vacationId) return;
 
-        vacationsService.getOneVacation(+vacationId)
+        const id = +vacationId;
+        const vacationFromRedux = vacations.find(v => v.vacationId === id);
+
+        if (vacationFromRedux) {
+            setVacation(vacationFromRedux);
+            return;
+        }
+
+        vacationsService.getOneVacation(id)
             .then((vacationFromServer) => {
                 setVacation(vacationFromServer);
             })
-            .catch((err) => {
+            .catch((err: unknown) => {
                 console.error(err);
                 setError("Failed to load vacation.");
             });
-    }, [vacationId, navigate]);
+    }, [vacationId, navigate, vacations]);
 
     // Update the matching form field in the local vacation state.
-    function handleChange(args: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
+    function handleChange(args: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void {
         const { name, value } = args.target;
 
         setVacation({
@@ -70,11 +85,12 @@ function EditVacation() {
     }
 
     // Store the selected image file in local state.
-    function handleFileChange(args: ChangeEvent<HTMLInputElement>) {
+    function handleFileChange(args: ChangeEvent<HTMLInputElement>): void {
         const file = args.target.files?.[0] || null;
         setImageFile(file);
     }
-    //validates the requirements to edit a vacation
+
+    // Validate the requirements to edit a vacation.
     function validateForm(): string {
         if (!vacation.destination?.trim()) return "Destination is required.";
         if (!vacation.description?.trim()) return "Description is required.";
@@ -87,7 +103,7 @@ function EditVacation() {
         return "";
     }
 
-    // Validate the form and send the data to the server.
+    // Validate the form, send the data to the server, and update Redux.
     async function Send(event: SyntheticEvent): Promise<void> {
         event.preventDefault();
         setError("");
@@ -99,15 +115,19 @@ function EditVacation() {
             return;
         }
 
+        const destination = vacation.destination!;
+        const description = vacation.description!;
+        const startDate = vacation.startDate!;
+        const endDate = vacation.endDate!;
         const price = vacation.price!;
 
         try {
             const formData = new FormData();
 
-            formData.append("destination", vacation.destination);
-            formData.append("description", vacation.description);
-            formData.append("startDate", vacation.startDate);
-            formData.append("endDate", vacation.endDate);
+            formData.append("destination", destination);
+            formData.append("description", description);
+            formData.append("startDate", startDate);
+            formData.append("endDate", endDate);
             formData.append("price", price.toString());
 
             if (vacation.imageName) {
@@ -118,21 +138,29 @@ function EditVacation() {
                 formData.append("image", imageFile);
             }
 
-            await vacationsService.updateVacation(vacation.vacationId!, formData);
+            const updatedVacation = await vacationsService.updateVacation(vacation.vacationId!, formData);
+
+            dispatch(updateVacationInRedux(updatedVacation));
+
             navigate("/admin-vacations");
         }
-        catch (err: any) {
-            setError(err.response?.data || "Failed to update vacation.");
+        catch (err: unknown) {
+            if (axios.isAxiosError<string>(err)) {
+                setError(err.response?.data || "Failed to update vacation.");
+            }
+            else {
+                setError("Failed to update vacation.");
+            }
         }
     }
+
     return (
         <div className="edit-vacation">
             <h5>Edit Vacation</h5>
 
-            {error && <p>{error}</p>}
+            {error && <p className="error-message">{error}</p>}
 
             <form onSubmit={Send} noValidate>
-
                 <input type="text" name="destination" value={vacation.destination ?? ""} onChange={handleChange} />
 
                 <textarea name="description" value={vacation.description ?? ""} onChange={handleChange} />

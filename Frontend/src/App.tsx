@@ -1,20 +1,10 @@
 
-// Main frontend component that defines the application routes.
-import VacationsList from "./pages/VacactionList/VacactionsList";
-import Register from "./pages/Register/Register";
-import { Route, Routes, Navigate, useLocation } from "react-router-dom";
-import Login from "./pages/Login/Login";
+import { useLocation } from "react-router-dom";
 import Menu from "./components/Layout/Menu";
-import AddVacation from "./pages/AddVacation/AddVacation";
-import Reports from "./pages/Reports/Reports";
-import EditVacation from "./pages/EditVacation/EditVacation";
-import AdminVacations from "./pages/AdminVacations/AdminVacations";
-import AiRecommendation from "./pages/AiRecommendation/AiRecommendation";
-import McpQuestion from "./pages/McpQuestion/McpQuestion";
-import PageNotFound from "./pages/PageNotFound/PageNotFound";
-import "./App.css"
+import Routing from "./components/Routing/Routing";
+import "./App.css";
 
-// Define the main application routes.
+// Main frontend layout component.
 function App() {
 
     const location = useLocation();
@@ -41,37 +31,9 @@ function App() {
             </header>
 
             <main>
-
-                <Routes>
-
-                    <Route path="/" element={<Navigate to="/login" />} />
-
-                    <Route path="/vacations-list" element={<VacationsList />} />
-
-                    <Route path="/register" element={<Register />} />
-
-                    <Route path="/login" element={<Login />} />
-
-                    <Route path="/add-vacation" element={<AddVacation />} />
-
-                    <Route path="/edit-vacation/:vacationId" element={<EditVacation />} />
-
-                    <Route path="/reports" element={<Reports />} />
-
-                    <Route path="/admin-vacations" element={<AdminVacations />} />
-
-                    <Route path="/ai-recommendation" element={<AiRecommendation />} />
-
-                    <Route path="/mcp-question" element={<McpQuestion />} />
-
-                    <Route path="*" element={<PageNotFound />} />
-
-
-
-                </Routes>
-
+                <Routing />
             </main>
-        </div >
+        </div>
     )
 }
 

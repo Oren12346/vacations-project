@@ -1,19 +1,24 @@
-// Backend service functions for mcp service operations.
+// Backend service functions for MCP service operations.
 import OpenAI from "openai";
 import appConfig from "../2-utils/app-config";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 
-const openAiClient = new OpenAI({
-    apiKey: appConfig.openAiApiKey
-});
+type VacationStatus = "all" | "active" | "future" | "past";
+
+type VacationSortBy =
+    | "startDate_asc"
+    | "price_asc"
+    | "price_desc"
+    | "likes_asc"
+    | "likes_desc";
 
 type SearchArgs = {
     destination?: string;
-    status?: "all" | "active" | "future" | "past";
+    status?: VacationStatus;
     minPrice?: number;
     maxPrice?: number;
-    sortBy?: "startDate_asc" | "price_asc" | "price_desc" | "likes_asc" | "likes_desc";
+    sortBy?: VacationSortBy;
     limit?: number;
 };
 
@@ -28,194 +33,278 @@ type VacationItem = {
     likesCount: number;
 };
 
-// Handle the extract text flow for this file.
-function extractText(result: any): string {
-    const content = result?.content;
+type TextContentItem = {
+    type: "text";
+    text: string;
+};
 
-    if (!Array.isArray(content)) return "";
+type ToolResult = {
+    content?: unknown;
+    structuredContent?: {
+        vacations?: unknown;
+        [key: string]: unknown;
+    };
+};
 
-    return content
-        .filter((item: any) => item?.type === "text")
-        .map((item: any) => item.text)
-        .join("\n");
-}
+type ParsedSearchResponse = {
+    destination?: unknown;
+    status?: unknown;
+    minPrice?: unknown;
+    maxPrice?: unknown;
+    sortBy?: unknown;
+    limit?: unknown;
+};
 
-// Handle the extract vacations flow for this file.
-function extractVacations(result: any): VacationItem[] {
-    const structuredVacations = result?.structuredContent?.vacations;
+class McpService {
 
-    if (Array.isArray(structuredVacations)) {
-        return structuredVacations;
+    private readonly openAiClient = new OpenAI({
+        apiKey: appConfig.openAiApiKey
+    });
+
+    // Check if a value is a regular object that can be safely inspected.
+    private isRecord(value: unknown): value is Record<string, unknown> {
+        return typeof value === "object" && value !== null && !Array.isArray(value);
     }
 
-    const text = extractText(result);
+    // Check if an MCP content item is a text item.
+    private isTextContentItem(value: unknown): value is TextContentItem {
+        if (!this.isRecord(value)) return false;
 
-    try {
-        const parsed = JSON.parse(text);
-        return Array.isArray(parsed) ? parsed : [];
-    }
-    catch {
-        return [];
-    }
-}
-
-// Handle the extract stats flow for this file.
-function extractStats(result: any): any {
-    if (result?.structuredContent) {
-        return result.structuredContent;
+        return value.type === "text" && typeof value.text === "string";
     }
 
-    const text = extractText(result);
+    // Check if an unknown value matches the vacation item structure.
+    private isVacationItem(value: unknown): value is VacationItem {
+        if (!this.isRecord(value)) return false;
 
-    try {
-        return JSON.parse(text);
-    }
-    catch {
-        return {};
-    }
-}
-
-// Handle the normalize destination flow for this file.
-function normalizeDestination(value: unknown): string | undefined {
-    if (typeof value !== "string") return undefined;
-
-    const cleaned = value.trim();
-    const lower = cleaned.toLowerCase();
-
-    const blockedValues = [
-        "vacation",
-        "vacations",
-        "trip",
-        "trips",
-        "holiday",
-        "holidays",
-        "database",
-        "data",
-        "price",
-        "prices",
-        "like",
-        "likes",
-        "what",
-        "which",
-        "show",
-        "tell",
-        "give",
-        "most",
-        "least",
-        "expensive",
-        "cheapest",
-        "popular",
-        "active",
-        "future",
-        "past"
-    ];
-
-    if (!cleaned || blockedValues.includes(lower)) {
-        return undefined;
+        return (
+            typeof value.vacationId === "number" &&
+            typeof value.destination === "string" &&
+            typeof value.description === "string" &&
+            typeof value.startDate === "string" &&
+            typeof value.endDate === "string" &&
+            typeof value.price === "number" &&
+            typeof value.imageName === "string" &&
+            typeof value.likesCount === "number"
+        );
     }
 
-    if (cleaned.length < 2) {
-        return undefined;
+    // Check if an unknown value is a valid vacation status filter.
+    private isVacationStatus(value: unknown): value is VacationStatus {
+        return (
+            value === "all" ||
+            value === "active" ||
+            value === "future" ||
+            value === "past"
+        );
     }
 
-    return cleaned;
-}
-
-// Handle the has explicit destination context flow for this file.
-function hasExplicitDestinationContext(question: string, destination: string): boolean {
-    const q = question.toLowerCase();
-    const d = destination.toLowerCase();
-
-    return (
-        q.includes(` in ${d}`) ||
-        q.includes(` to ${d}`) ||
-        q.includes(` for ${d}`) ||
-        q.includes(` in ${d}?`) ||
-        q.includes(` to ${d}?`) ||
-        q.includes(` for ${d}?`)
-    );
-}
-
-// Handle the build direct answer flow for this file.
-function buildDirectAnswer(searchArgs: SearchArgs, vacations: VacationItem[]): string | null {
-    if (vacations.length === 0) {
-        return "The information does not exist in the database.";
+    // Check if an unknown value is a valid vacation sorting option.
+    private isVacationSortBy(value: unknown): value is VacationSortBy {
+        return (
+            value === "startDate_asc" ||
+            value === "price_asc" ||
+            value === "price_desc" ||
+            value === "likes_asc" ||
+            value === "likes_desc"
+        );
     }
 
-    const first = vacations[0]!;
+    // Extract plain text content from an MCP tool result.
+    private extractText(result: ToolResult): string {
+        const content = result.content;
 
-    if (searchArgs.sortBy === "price_desc") {
-        return `The most expensive vacation is ${first.destination}, priced at ${first.price}.`;
+        if (!Array.isArray(content)) return "";
+
+        return content
+            .filter(item => this.isTextContentItem(item))
+            .map(item => item.text)
+            .join("\n");
     }
 
-    if (searchArgs.sortBy === "price_asc") {
-        return `The cheapest vacation is ${first.destination}, priced at ${first.price}.`;
+    // Extract vacations from structured MCP content or from fallback text JSON.
+    private extractVacations(result: ToolResult): VacationItem[] {
+        const structuredVacations = result.structuredContent?.vacations;
+
+        if (Array.isArray(structuredVacations)) {
+            return structuredVacations.filter(item => this.isVacationItem(item));
+        }
+
+        const text = this.extractText(result);
+
+        try {
+            const parsed = JSON.parse(text) as unknown;
+
+            if (!Array.isArray(parsed)) return [];
+
+            return parsed.filter(item => this.isVacationItem(item));
+        }
+        catch {
+            return [];
+        }
     }
 
-    if (searchArgs.sortBy === "likes_desc") {
-        return `The most liked vacation is ${first.destination}, with ${first.likesCount} likes.`;
+    // Extract statistics from structured MCP content or from fallback text JSON.
+    private extractStats(result: ToolResult): Record<string, unknown> {
+        if (result.structuredContent) {
+            return result.structuredContent;
+        }
+
+        const text = this.extractText(result);
+
+        try {
+            const parsed = JSON.parse(text) as unknown;
+
+            if (!this.isRecord(parsed)) return {};
+
+            return parsed;
+        }
+        catch {
+            return {};
+        }
     }
 
-    if (searchArgs.sortBy === "likes_asc") {
-        return `The least liked vacation is ${first.destination}, with ${first.likesCount} likes.`;
+    // Normalize a possible destination value returned by the AI.
+    private normalizeDestination(value: unknown): string | undefined {
+        if (typeof value !== "string") return undefined;
+
+        const cleaned = value.trim();
+        const lower = cleaned.toLowerCase();
+
+        const blockedValues = [
+            "vacation",
+            "vacations",
+            "trip",
+            "trips",
+            "holiday",
+            "holidays",
+            "database",
+            "data",
+            "price",
+            "prices",
+            "like",
+            "likes",
+            "what",
+            "which",
+            "show",
+            "tell",
+            "give",
+            "most",
+            "least",
+            "expensive",
+            "cheapest",
+            "popular",
+            "active",
+            "future",
+            "past"
+        ];
+
+        if (!cleaned || blockedValues.includes(lower)) {
+            return undefined;
+        }
+
+        if (cleaned.length < 2) {
+            return undefined;
+        }
+
+        return cleaned;
     }
 
-    return null;
-}
+    // Check that the user question clearly refers to a specific destination.
+    private hasExplicitDestinationContext(question: string, destination: string): boolean {
+        const q = question.toLowerCase();
+        const d = destination.toLowerCase();
 
-// Handle the parse question to search args flow for this file.
-async function parseQuestionToSearchArgs(question: string): Promise<SearchArgs> {
-    const q = question.toLowerCase().trim();
-    const args: SearchArgs = {};
-
-    if (
-        q.includes("most expensive") ||
-        q.includes("highest price")
-    ) {
-        args.sortBy = "price_desc";
-        args.limit = 1;
+        return (
+            q.includes(` in ${d}`) ||
+            q.includes(` to ${d}`) ||
+            q.includes(` for ${d}`) ||
+            q.includes(` in ${d}?`) ||
+            q.includes(` to ${d}?`) ||
+            q.includes(` for ${d}?`)
+        );
     }
 
-    if (
-        q.includes("cheapest") ||
-        q.includes("lowest price")
-    ) {
-        args.sortBy = "price_asc";
-        args.limit = 1;
+    // Build a direct answer for simple ranking questions.
+    private buildDirectAnswer(searchArgs: SearchArgs, vacations: VacationItem[]): string | null {
+        if (vacations.length === 0) {
+            return "The information does not exist in the database.";
+        }
+
+        const first = vacations[0]!;
+
+        if (searchArgs.sortBy === "price_desc") {
+            return `The most expensive vacation is ${first.destination}, priced at ${first.price}.`;
+        }
+
+        if (searchArgs.sortBy === "price_asc") {
+            return `The cheapest vacation is ${first.destination}, priced at ${first.price}.`;
+        }
+
+        if (searchArgs.sortBy === "likes_desc") {
+            return `The most liked vacation is ${first.destination}, with ${first.likesCount} likes.`;
+        }
+
+        if (searchArgs.sortBy === "likes_asc") {
+            return `The least liked vacation is ${first.destination}, with ${first.likesCount} likes.`;
+        }
+
+        return null;
     }
 
-    if (
-        q.includes("most liked") ||
-        q.includes("most popular") ||
-        q.includes("highest likes")
-    ) {
-        args.sortBy = "likes_desc";
-        args.limit = 1;
-    }
+    // Parse the user's natural language question into structured vacation search arguments.
+    private async parseQuestionToSearchArgs(question: string): Promise<SearchArgs> {
+        const q = question.toLowerCase().trim();
+        const args: SearchArgs = {};
 
-    if (
-        q.includes("least liked") ||
-        q.includes("lowest likes")
-    ) {
-        args.sortBy = "likes_asc";
-        args.limit = 1;
-    }
+        if (
+            q.includes("most expensive") ||
+            q.includes("highest price")
+        ) {
+            args.sortBy = "price_desc";
+            args.limit = 1;
+        }
 
-    if (q.includes("active")) {
-        args.status = "active";
-    }
+        if (
+            q.includes("cheapest") ||
+            q.includes("lowest price")
+        ) {
+            args.sortBy = "price_asc";
+            args.limit = 1;
+        }
 
-    if (q.includes("future") || q.includes("upcoming")) {
-        args.status = "future";
-    }
+        if (
+            q.includes("most liked") ||
+            q.includes("most popular") ||
+            q.includes("highest likes")
+        ) {
+            args.sortBy = "likes_desc";
+            args.limit = 1;
+        }
 
-    if (q.includes("past") || q.includes("ended")) {
-        args.status = "past";
-    }
+        if (
+            q.includes("least liked") ||
+            q.includes("lowest likes")
+        ) {
+            args.sortBy = "likes_asc";
+            args.limit = 1;
+        }
 
-    const response = await openAiClient.responses.create({
-        model: appConfig.aiModel,
-        input: `Extract vacation search filters from this user question.
+        if (q.includes("active")) {
+            args.status = "active";
+        }
+
+        if (q.includes("future") || q.includes("upcoming")) {
+            args.status = "future";
+        }
+
+        if (q.includes("past") || q.includes("ended")) {
+            args.status = "past";
+        }
+
+        const response = await this.openAiClient.responses.create({
+            model: appConfig.aiModel,
+            input: `Extract vacation search filters from this user question.
 
 Return ONLY valid JSON in this exact shape:
 {
@@ -249,101 +338,113 @@ Rules:
 
 User question:
 ${question}`
-    });
-
-    const text = response.output_text.trim();
-
-    try {
-        const parsed = JSON.parse(text);
-
-        const normalizedDestination = normalizeDestination(parsed.destination);
-
-        if (normalizedDestination && hasExplicitDestinationContext(question, normalizedDestination)) {
-            args.destination = normalizedDestination;
-        }
-
-        if (parsed.status && !args.status) {
-            args.status = parsed.status;
-        }
-
-        if (parsed.minPrice !== null && parsed.minPrice !== undefined) {
-            args.minPrice = Number(parsed.minPrice);
-        }
-
-        if (parsed.maxPrice !== null && parsed.maxPrice !== undefined) {
-            args.maxPrice = Number(parsed.maxPrice);
-        }
-
-        if (parsed.sortBy && !args.sortBy) {
-            args.sortBy = parsed.sortBy;
-        }
-
-        if (
-            parsed.limit !== null &&
-            parsed.limit !== undefined &&
-            args.limit === undefined
-        ) {
-            args.limit = Number(parsed.limit);
-        }
-
-        return args;
-    }
-    catch {
-        return args;
-    }
-}
-
-// Send a question to the MCP endpoint and return the reply.
-async function askQuestion(question: string): Promise<string> {
-    if (!question.trim()) {
-        throw new Error("Question is required.");
-    }
-
-    if (!appConfig.openAiApiKey) {
-        throw new Error("Missing OPENAI_API_KEY.");
-    }
-
-    const client = new Client({
-        name: "vacations-backend-client",
-        version: "1.0.0"
-    });
-
-    const transport = new StreamableHTTPClientTransport(
-        new URL("http://localhost:4000/mcp-server")
-    );
-
-    try {
-        await client.connect(transport as any);
-
-        const searchArgs = await parseQuestionToSearchArgs(question);
-
-        const vacationsResult = await client.callTool({
-            name: "search_vacations",
-            arguments: searchArgs
         });
 
-        const statsResult = await client.callTool({
-            name: "vacations_stats",
-            arguments: {}
-        });
+        const text = response.output_text.trim();
 
-        const vacations = extractVacations(vacationsResult);
+        try {
+            const parsed = JSON.parse(text) as ParsedSearchResponse;
 
-        const directAnswer = buildDirectAnswer(searchArgs, vacations);
+            const normalizedDestination = this.normalizeDestination(parsed.destination);
 
-        if (directAnswer) {
-            return directAnswer;
+            if (normalizedDestination && this.hasExplicitDestinationContext(question, normalizedDestination)) {
+                args.destination = normalizedDestination;
+            }
+
+            if (this.isVacationStatus(parsed.status) && !args.status) {
+                args.status = parsed.status;
+            }
+
+            if (parsed.minPrice !== null && parsed.minPrice !== undefined) {
+                const minPrice = Number(parsed.minPrice);
+
+                if (!Number.isNaN(minPrice)) {
+                    args.minPrice = minPrice;
+                }
+            }
+
+            if (parsed.maxPrice !== null && parsed.maxPrice !== undefined) {
+                const maxPrice = Number(parsed.maxPrice);
+
+                if (!Number.isNaN(maxPrice)) {
+                    args.maxPrice = maxPrice;
+                }
+            }
+
+            if (this.isVacationSortBy(parsed.sortBy) && !args.sortBy) {
+                args.sortBy = parsed.sortBy;
+            }
+
+            if (
+                parsed.limit !== null &&
+                parsed.limit !== undefined &&
+                args.limit === undefined
+            ) {
+                const limit = Number(parsed.limit);
+
+                if (!Number.isNaN(limit)) {
+                    args.limit = limit;
+                }
+            }
+
+            return args;
+        }
+        catch {
+            return args;
+        }
+    }
+
+    // Send a question to the MCP endpoint and return the final user-facing answer.
+    public async askQuestion(question: string): Promise<string> {
+        if (!question.trim()) {
+            throw new Error("Question is required.");
         }
 
-        const toolsData = {
-            searchArgs,
-            vacations,
-            stats: extractStats(statsResult)
-        };
+        if (!appConfig.openAiApiKey) {
+            throw new Error("Missing OPENAI_API_KEY.");
+        }
 
-        const response = await openAiClient.responses.create({
-            model: appConfig.aiModel,
-            input: `Answer the user's question only according to the MCP tool results below.
+        const client = new Client({
+            name: "vacations-backend-client",
+            version: "1.0.0"
+        });
+
+        const transport = new StreamableHTTPClientTransport(
+            new URL("http://localhost:4000/mcp-server")
+        );
+
+        try {
+            await client.connect(transport as unknown as Parameters<typeof client.connect>[0]);
+
+            const searchArgs = await this.parseQuestionToSearchArgs(question);
+
+            const vacationsResult = await client.callTool({
+                name: "search_vacations",
+                arguments: searchArgs
+            });
+
+            const statsResult = await client.callTool({
+                name: "vacations_stats",
+                arguments: {}
+            });
+
+            const vacations = this.extractVacations(vacationsResult as ToolResult);
+
+            const directAnswer = this.buildDirectAnswer(searchArgs, vacations);
+
+            if (directAnswer) {
+                return directAnswer;
+            }
+
+            const toolsData = {
+                searchArgs,
+                vacations,
+                stats: this.extractStats(statsResult as ToolResult)
+            };
+
+            const response = await this.openAiClient.responses.create({
+                model: appConfig.aiModel,
+                input: `Answer the user's question only according to the MCP tool results below.
 If the answer does not exist in the data, say that the information does not exist in the database.
 Keep the answer short and clear.
 
@@ -352,32 +453,26 @@ ${JSON.stringify(toolsData, null, 2)}
 
 User question:
 ${question}`
-        });
+            });
 
-        return response.output_text;
-    }
-    finally {
-        try {
-            await transport.terminateSession?.();
+            return response.output_text;
         }
-        catch {
-        }
+        finally {
+            try {
+                await transport.terminateSession?.();
+            }
+            catch {
+            }
 
-        try {
-            await client.close();
+            try {
+                await client.close();
+            }
+            catch {
+            }
         }
-        catch {
-        }
-    }
-}
-
-class McpService {
-
-    // Send a question to the MCP endpoint and return the reply.
-    public async askQuestion(question: string): Promise<string> {
-        return askQuestion(question);
     }
 }
 
 const mcpService = new McpService();
+
 export default mcpService;

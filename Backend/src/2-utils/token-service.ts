@@ -13,47 +13,49 @@ export type AuthPayload = {
     exp?: number;
 };
 
-// Handle the get token from header flow for this file.
-function getTokenFromHeader(authorizationHeader?: string): string | null {
-    if (!authorizationHeader) {
-        return null;
-    }
+class TokenService {
 
-    const [scheme, token] = authorizationHeader.split(" ");
-
-    if (scheme !== "Bearer" || !token) {
-        return null;
-    }
-
-    return token;
-}
-
-// Handle the verify token flow for this file.
-function verifyToken(authorizationHeader?: string): AuthPayload | null {
-    const token = getTokenFromHeader(authorizationHeader);
-
-    if (!token) {
-        return null;
-    }
-
-    try {
-        const decoded = jwt.verify(token, appConfig.jwtSecret);
-
-        if (
-            typeof decoded !== "object" ||
-            !("userId" in decoded) ||
-            !("role" in decoded)
-        ) {
+    // Handle the get token from header flow for this file.
+    private getTokenFromHeader(authorizationHeader?: string): string | null {
+        if (!authorizationHeader) {
             return null;
         }
 
-        return decoded as AuthPayload;
+        const [scheme, token] = authorizationHeader.split(" ");
+
+        if (scheme !== "Bearer" || !token) {
+            return null;
+        }
+
+        return token;
     }
-    catch {
-        return null;
+
+    // Handle the verify token flow for this file.
+    public verifyToken(authorizationHeader?: string): AuthPayload | null {
+        const token = this.getTokenFromHeader(authorizationHeader);
+
+        if (!token) {
+            return null;
+        }
+
+        try {
+            const decoded = jwt.verify(token, appConfig.jwtSecret);
+
+            if (
+                typeof decoded !== "object" ||
+                !("userId" in decoded) ||
+                !("role" in decoded)
+            ) {
+                return null;
+            }
+
+            return decoded as AuthPayload;
+        }
+        catch {
+            return null;
+        }
     }
 }
 
-export default {
-    verifyToken
-};
+const tokenService = new TokenService();
+export default tokenService;

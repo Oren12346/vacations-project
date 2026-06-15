@@ -22,7 +22,7 @@ const server = express();
 // Enable CORS and JSON body parsing for all API routes.
 server.use(cors());
 server.use(express.json());
-server.use("/images", express.static(path.join(__dirname, "..", "assets", "images")));
+server.use("/images", express.static(path.join(__dirname, "assets", "images")));
 server.use("/api/auth", authRoutes);
 server.use("/api/vacations", vacationsRoutes);
 server.use("/api/likes", likesRoutes);

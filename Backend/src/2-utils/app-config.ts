@@ -8,7 +8,7 @@ class AppConfig {
     public dbName = process.env.DB_NAME || "vacations_db";
     public jwtSecret = process.env.JWT_SECRET || "";
     public openAiApiKey = process.env.OPENAI_API_KEY || "";
-    public aiModel = "gpt-5.4";
+    public aiModel = process.env.AI_MODEL || "gpt-5.4";
 }
 
 const appConfig = new AppConfig();

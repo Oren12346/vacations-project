@@ -5,11 +5,12 @@ import CredentialsModel from "../1-models/credentials-model";
 import UserModel from "../1-models/user-model";
 import store from "../store/store";
 import { initUser, logoutUser } from "../store/userSlice";
+import { clearVacations } from "../store/vacationsSlice";
 import { jwtDecode } from "jwt-decode";
 
 class AuthService {
 
-    // Register a new user, save the token, and update the Redux store.
+    // Register a new user, save the token, and reset user-specific vacation cache.
     public async register(user: UserModel): Promise<void> {
         const response = await axios.post(appConfig.registerUrl, user);
         const token = response.data.token;
@@ -17,10 +18,12 @@ class AuthService {
         localStorage.setItem("token", token);
 
         const currentUser = jwtDecode<UserModel>(token);
+
+        store.dispatch(clearVacations());
         store.dispatch(initUser(currentUser));
     }
 
-    // Log in an existing user, save the token, and update the Redux store.
+    // Log in an existing user, save the token, and reset user-specific vacation cache.
     public async login(credentials: CredentialsModel): Promise<void> {
         const response = await axios.post(appConfig.loginUrl, credentials);
         const token = response.data.token;
@@ -28,12 +31,16 @@ class AuthService {
         localStorage.setItem("token", token);
 
         const currentUser = jwtDecode<UserModel>(token);
+
+        store.dispatch(clearVacations());
         store.dispatch(initUser(currentUser));
     }
 
-    // Clear the token and reset the Redux user state.
+    // Clear the token and reset Redux state on logout.
     public logout(): void {
         localStorage.removeItem("token");
+
+        store.dispatch(clearVacations());
         store.dispatch(logoutUser());
     }
 

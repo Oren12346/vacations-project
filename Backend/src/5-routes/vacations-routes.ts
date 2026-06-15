@@ -1,5 +1,5 @@
 // Express routes for vacations endpoints.
-import express, { NextFunction, Request, Response } from "express";
+import express, { Request, Response } from "express";
 import vacationsService from "../3-services/vacations-service";
 import VacationModel from "../1-models/vacation-model";
 import verifyLoggedIn from "../4-middleware/verify-logged-in";
@@ -11,91 +11,76 @@ import { AuthPayload } from "../2-utils/token-service";
 const router = express.Router();
 
 // Return all vacations for the logged-in user.
-router.get("/", verifyLoggedIn, async (_request: Request, response: Response, next: NextFunction) => {
-    try {
-        const user = response.locals.user as AuthPayload;
-        const vacations = await vacationsService.getAllVacations(user.userId);
-        response.json(vacations);
-    }
-    catch (error) {
-        next(error);
-    }
+router.get("/", verifyLoggedIn, async (_request: Request, response: Response) => {
+    const user = response.locals.user as AuthPayload;
+    const vacations = await vacationsService.getAllVacations(user.userId);
+    response.json(vacations);
 });
 
-router.get("/:vacationId", verifyLoggedIn, async (request: Request, response: Response, next: NextFunction) => {
-    try {
-        const vacationId = Number(request.params.vacationId);
-        const vacation = await vacationsService.getOneVacation(vacationId);
-        if (!vacation) {
-            response.status(404).send("Vacation not found");
-            return;
-        }
-        response.json(vacation);
+// Return one vacation by vacation id.
+router.get("/:vacationId", verifyLoggedIn, async (request: Request, response: Response) => {
+    const vacationId = Number(request.params.vacationId);
+    const vacation = await vacationsService.getOneVacation(vacationId);
+
+    if (!vacation) {
+        response.status(404).send("Vacation not found");
+        return;
     }
-    catch (error) {
-        next(error);
-    }
+
+    response.json(vacation);
 });
 
 // Update an existing vacation and optionally replace its image.
-router.put("/:vacationId", verifyLoggedIn, verifyAdmin, upload.single("image"), async (request: Request, response: Response, next: NextFunction) => {
-    try {
-        const vacationId = Number(request.params.vacationId);
-        const vacation = Object.assign(new VacationModel(), request.body); vacation.vacationId = vacationId;
-        vacation.price = +vacation.price;
+router.put("/:vacationId", verifyLoggedIn, verifyAdmin, upload.single("image"), async (request: Request, response: Response) => {
+    const vacationId = Number(request.params.vacationId);
 
-        const existingVacation = await vacationsService.getOneVacation(vacationId);
-        if (!existingVacation) {
-            response.status(404).send("Vacation not found");
-            return;
-        }
+    const vacation = Object.assign(new VacationModel(), request.body);
+    vacation.vacationId = vacationId;
+    vacation.price = +vacation.price;
 
-        if (request.file) {
-            vacation.imageName = request.file.filename;
-        }
-        else {
-            vacation.imageName = existingVacation.imageName;
-        }
+    const existingVacation = await vacationsService.getOneVacation(vacationId);
 
-        const updatedVacation = await vacationsService.updateVacation(vacation);
-        response.json(updatedVacation);
+    if (!existingVacation) {
+        response.status(404).send("Vacation not found");
+        return;
     }
-    catch (error) {
-        next(error);
+
+    if (request.file) {
+        vacation.imageName = request.file.filename;
     }
+    else {
+        vacation.imageName = existingVacation.imageName;
+    }
+
+    const updatedVacation = await vacationsService.updateVacation(vacation);
+    response.json(updatedVacation);
 });
 
-router.post("/", verifyLoggedIn, verifyAdmin, upload.single("image"), async (request: Request, response: Response, next: NextFunction) => {
-    try {
-        const vacation = Object.assign(new VacationModel(), request.body);
+// Add a new vacation with image upload.
+router.post("/", verifyLoggedIn, verifyAdmin, upload.single("image"), async (request: Request, response: Response) => {
+    const vacation = Object.assign(new VacationModel(), request.body);
 
-        if (request.file) {
-            vacation.imageName = request.file.filename;
-        }
+    if (request.file) {
+        vacation.imageName = request.file.filename;
+    }
 
-        vacation.price = +vacation.price;
+    vacation.price = +vacation.price;
 
-        const addedVacation = await vacationsService.addVacation(vacation);
-        response.status(201).json(addedVacation);
+    const addedVacation = await vacationsService.addVacation(vacation);
+    response.status(201).json(addedVacation);
+});
+
+// Delete vacation by vacation id.
+router.delete("/:vacationId", verifyLoggedIn, verifyAdmin, async (request: Request, response: Response) => {
+    const vacationId = Number(request.params.vacationId);
+    const isDeleted = await vacationsService.deleteVacation(vacationId);
+
+    if (!isDeleted) {
+        response.sendStatus(404);
+        return;
     }
-    catch (error) {
-        next(error);
-    }
-}
-);
-router.delete("/:vacationId", verifyLoggedIn, verifyAdmin, async (request: Request, response: Response, next: NextFunction) => {
-    try {
-        const vacationId = Number(request.params.vacationId);
-        const isDeleted = await vacationsService.deleteVacation(vacationId);
-        if (!isDeleted) {
-            response.sendStatus(404)
-            return;
-        }
-        response.sendStatus(204);
-    }
-    catch (error) {
-        next(error);
-    }
+
+    response.sendStatus(204);
 });
 
 export default router;

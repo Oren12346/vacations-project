@@ -3,7 +3,8 @@ import { ChangeEvent, SyntheticEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import UserModel from "../../1-models/user-model";
 import authService from "../../3-services/auth-service";
-import "./Register.css"
+import axios from "axios";
+import "./Register.css";
 
 
 // Render the Register component.
@@ -51,14 +52,20 @@ function Register() {
             await authService.register(user);
             navigate("/vacations-list");
         }
-        catch (err: any) {
-            setError(err.response?.data || "Register failed.");
+        catch (err: unknown) {
+            if (axios.isAxiosError(err)) {
+                setError(err.response?.data || "Register failed");
+            }
+            else {
+                setError("Register failed")
+            }
         }
     }
     return (
         <div className="register">
             <h2>Register</h2>
-            {error && <p>{error}</p>}
+
+            {error && <p className="error-message">{error}</p>}
             <form onSubmit={send} noValidate>
                 <input type="text" name="firstName" placeholder="First Name" onChange={handleChange} />
                 <input type="text" name="lastName" placeholder="Last Name" onChange={handleChange} />

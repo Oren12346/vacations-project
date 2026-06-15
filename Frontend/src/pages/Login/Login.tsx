@@ -3,6 +3,7 @@ import { useState, ChangeEvent, SyntheticEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import CredentialsModel from "../../1-models/credentials-model";
 import authService from "../../3-services/auth-service";
+import axios from "axios";
 import "./Login.css"
 
 // Render the Login component.
@@ -50,8 +51,13 @@ function Login() {
             await authService.login(credentials);
             navigate("/vacations-list");
         }
-        catch (err: any) {
-            setError(err.response?.data || "Login failed.");
+        catch (err: unknown) {
+            if (axios.isAxiosError(err)) {
+                setError(err.response?.data || "Login failed.");
+            }
+            else {
+                setError("Login failed.");
+            }
         }
     }
 
@@ -60,7 +66,7 @@ function Login() {
             <div className="login-box">
                 <h4>Login</h4>
 
-                {error && <p>{error}</p>}
+                {error && <p className="error-message">{error}</p>}
 
                 <form onSubmit={send} noValidate>
 

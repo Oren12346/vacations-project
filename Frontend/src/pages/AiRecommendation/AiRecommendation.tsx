@@ -1,6 +1,7 @@
 // Page component responsible for the AiRecommendation screen.
 import { useEffect, useState, ChangeEvent, SyntheticEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import aiService from "../../3-services/ai-service";
 import "./AiRecommendation.css";
 
@@ -42,8 +43,13 @@ function AiRecommendation() {
             const recommendation = await aiService.getRecommendation(question);
             setAnswer(recommendation);
         }
-        catch (err: any) {
-            setError(err.response?.data || "Failed to get recommendation.");
+        catch (err: unknown) {
+            if (axios.isAxiosError<string>(err)) {
+                setError(err.response?.data || "Failed to get recommendation.");
+            }
+            else {
+                setError("Failed to get recommendation.");
+            }
         }
     }
 
@@ -90,10 +96,12 @@ function AiRecommendation() {
                 <h2>AI Recommendation</h2>
 
                 {error && <p className="error-message">{error}</p>}
+
                 <form onSubmit={send} noValidate>
                     <input type="text" name="question" placeholder="Enter destination" value={question} onChange={handleChange} />
                     <button type="submit">Get Recommendation</button>
                 </form>
+
                 {answerLines.length > 0 && (
                     <div className="recommendation-box">
                         {answerLines.map((line, index) => (
